@@ -1,6 +1,18 @@
 import streamlit as st
 from pypdf import PdfReader
 
+def extract_text_from_pdf(uploaded_file):
+    reader = PdfReader(uploaded_file)
+    text = ""
+
+    for page in reader.pages:
+        page_text = page.extract_text()
+
+        if page_text:
+            text += page_text + "\n"
+
+    return text
+
 # Page configuration
 st.set_page_config(
     page_title="AI StudyMate",
@@ -73,7 +85,17 @@ elif option == "📝 AI Notes":
     )
 
     if uploaded_file:
-        st.success(f"Uploaded: {uploaded_file.name}")
+    st.success(f"Uploaded: {uploaded_file.name}")
+
+    pdf_text = extract_text_from_pdf(uploaded_file)
+
+    if pdf_text:
+        st.success("✅ PDF text extracted successfully!")
+
+        with st.expander("📖 Preview extracted text"):
+            st.write(pdf_text[:3000])
+    else:
+        st.warning("⚠️ Could not extract text from this PDF.")
 
         if st.button("✨ Generate Notes"):
             st.info(
