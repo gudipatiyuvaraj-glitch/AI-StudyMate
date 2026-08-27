@@ -152,4 +152,4 @@ elif option == "📅 Study Planner":
 
 st.divider()
 
-st.caption("AI StudyMate |
+st.caption("AI StudyMate | Built for students 🚀")
