@@ -1,4 +1,5 @@
 import streamlit as st
+from pypdf import PdfReader
 
 # Page configuration
 st.set_page_config(
