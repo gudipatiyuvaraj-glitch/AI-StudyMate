@@ -1,6 +1,10 @@
 import streamlit as st
 from pypdf import PdfReader
 
+
+# -----------------------------
+# PDF TEXT EXTRACTION FUNCTION
+# -----------------------------
 def extract_text_from_pdf(uploaded_file):
     reader = PdfReader(uploaded_file)
     text = ""
@@ -13,166 +17,113 @@ def extract_text_from_pdf(uploaded_file):
 
     return text
 
-# Page configuration
+
+# -----------------------------
+# APP CONFIGURATION
+# -----------------------------
 st.set_page_config(
     page_title="AI StudyMate",
-    page_icon="🎓",
+    page_icon="📚",
     layout="wide"
 )
 
-# Title
-st.title("🎓 AI StudyMate")
-st.subheader("Your Personal AI-Powered Study Assistant")
 
-st.write(
-    "Upload your study material and use AI to create notes, "
-    "quizzes, important questions, and personalized study plans."
+# -----------------------------
+# SIDEBAR
+# -----------------------------
+st.sidebar.title("📚 AI StudyMate")
+
+page = st.sidebar.radio(
+    "Navigation",
+    ["🏠 Home", "📝 AI Notes", "❓ Quiz"]
 )
 
-st.divider()
 
-# Sidebar
-with st.sidebar:
-    st.header("📚 StudyMate Menu")
+# -----------------------------
+# HOME PAGE
+# -----------------------------
+if page == "🏠 Home":
 
-    option = st.radio(
-        "Choose a feature:",
-        [
-            "🏠 Home",
-            "📝 AI Notes",
-            "❓ AI Quiz",
-            "💬 Ask My Material",
-            "📅 Study Planner"
-        ]
-    )
-
-# Home
-if option == "🏠 Home":
-    st.header("Welcome to AI StudyMate! 👋")
+    st.title("📚 AI StudyMate")
+    st.subheader("Your Smart Study Companion 🚀")
 
     st.write(
-        "AI StudyMate helps students understand and revise "
-        "their study material more effectively."
+        "Upload your study materials and use AI-powered tools "
+        "to make studying easier and smarter."
     )
+
+    st.divider()
+
+    st.subheader("✨ Features")
 
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.info("📄\n\n**Upload Material**\n\nUpload your study PDF.")
+        st.info("📝 AI Notes\n\nGenerate useful notes from your study material.")
 
     with col2:
-        st.success("🧠\n\n**Learn Smarter**\n\nGenerate AI-powered study content.")
+        st.info("❓ Quiz\n\nTest your knowledge with quizzes.")
 
     with col3:
-        st.warning("📊\n\n**Track Learning**\n\nTest your knowledge with quizzes.")
+        st.info("📚 Study Better\n\nOrganize your learning in one place.")
 
-# AI Notes
-elif option == "📝 AI Notes":
-    st.header("📝 AI Notes Generator")
+
+# -----------------------------
+# AI NOTES PAGE
+# -----------------------------
+elif page == "📝 AI Notes":
+
+    st.title("📝 AI Notes")
+
+    st.write("Upload your study material below.")
 
     uploaded_file = st.file_uploader(
-        "Upload your study material",
+        "📄 Upload your study material",
         type=["pdf"]
     )
 
-    note_type = st.selectbox(
-        "Choose note type:",
-        [
-            "Short Notes",
-            "Detailed Notes",
-            "Exam-Focused Notes"
-        ]
-    )
+    if uploaded_file is not None:
 
-    if uploaded_file:
-    st.success(f"Uploaded: {uploaded_file.name}")
+        st.success(f"✅ Uploaded: {uploaded_file.name}")
 
-    pdf_text = extract_text_from_pdf(uploaded_file)
+        try:
+            pdf_text = extract_text_from_pdf(uploaded_file)
 
-    if pdf_text:
-        st.success("✅ PDF text extracted successfully!")
+            if pdf_text:
 
-        with st.expander("📖 Preview extracted text"):
-            st.write(pdf_text[:3000])
-    else:
-        st.warning("⚠️ Could not extract text from this PDF.")
+                st.success("✅ PDF text extracted successfully!")
 
-        if st.button("✨ Generate Notes"):
-            st.info(
-                "AI Notes generation will be connected in the next stage."
-            )
+                with st.expander("📖 Preview extracted text"):
+                    st.write(pdf_text[:3000])
 
-# AI Quiz
-elif option == "❓ AI Quiz":
-    st.header("❓ AI Quiz Generator")
+                note_type = st.selectbox(
+                    "Choose note type",
+                    ["Short Notes", "Detailed Notes", "Important Points"]
+                )
 
-    uploaded_file = st.file_uploader(
-        "Upload study material for the quiz",
-        type=["pdf"]
-    )
+                if st.button("✨ Generate Notes"):
 
-    number_of_questions = st.slider(
-        "Number of questions:",
-        min_value=5,
-        max_value=20,
-        value=10
-    )
+                    st.info(
+                        f"🤖 AI note generation for '{note_type}' "
+                        "will be added in the next step!"
+                    )
 
-    if uploaded_file:
-        st.success(f"Uploaded: {uploaded_file.name}")
+            else:
+                st.warning(
+                    "⚠️ Could not extract text from this PDF."
+                )
 
-        if st.button("🚀 Generate Quiz"):
-            st.info(
-                "AI Quiz generation will be connected in the next stage."
-            )
+        except Exception as e:
+            st.error(f"❌ Error reading PDF: {e}")
 
-# Ask My Material
-elif option == "💬 Ask My Material":
-    st.header("💬 Ask My Material")
 
-    uploaded_file = st.file_uploader(
-        "Upload your study material",
-        type=["pdf"]
-    )
+# -----------------------------
+# QUIZ PAGE
+# -----------------------------
+elif page == "❓ Quiz":
 
-    question = st.text_input(
-        "Ask a question about your study material:"
-    )
+    st.title("❓ Quiz")
 
-    if st.button("🔍 Ask AI"):
-        if uploaded_file and question:
-            st.info(
-                "AI question answering will be connected in the next stage."
-            )
-        elif not uploaded_file:
-            st.warning("Please upload a PDF first.")
-        else:
-            st.warning("Please enter a question.")
+    st.write("Upload study material to generate quizzes in a future update.")
 
-# Study Planner
-elif option == "📅 Study Planner":
-    st.header("📅 Personalized Study Planner")
-
-    exam_date = st.date_input("Select your exam date")
-
-    study_hours = st.slider(
-        "How many hours can you study per day?",
-        min_value=1,
-        max_value=12,
-        value=3
-    )
-
-    topics = st.text_area(
-        "Enter your topics/chapters:",
-        placeholder="Example:\nPython\nMachine Learning\nDBMS\nData Structures"
-    )
-
-    if st.button("📅 Create Study Plan"):
-        if topics:
-            st.success("Study plan generation will be connected in the next stage.")
-        else:
-            st.warning("Please enter your topics first.")
-
-st.divider()
-
-st.caption("AI StudyMate | Built for students 🚀")
+    st.info("🚀 AI Quiz generation will be added soon!")
