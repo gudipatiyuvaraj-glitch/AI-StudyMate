@@ -156,7 +156,7 @@ Important:
                         ):
 
                             response = client.models.generate_content(
-                                model="gemini-2.5-flash",
+                                model="gemini-3.6-flash",
                                 contents=summary_prompt
                             )
 
@@ -271,7 +271,7 @@ Important:
                         ):
 
                             quiz_response = client.models.generate_content(
-                                model="gemini-2.5-flash",
+                                model="gemini-3.6-flash",
                                 contents=quiz_prompt
                             )
 
