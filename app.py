@@ -15,7 +15,7 @@ st.set_page_config(
 
 
 # --------------------------------------------------
-# SIDEBAR - SETTINGS
+# SIDEBAR
 # --------------------------------------------------
 
 with st.sidebar:
@@ -67,7 +67,7 @@ if uploaded_file is not None:
         # Read PDF
         reader = PdfReader(uploaded_file)
 
-        # Extract text from all pages
+        # Extract text
         extracted_text = ""
 
         for page in reader.pages:
@@ -76,10 +76,12 @@ if uploaded_file is not None:
             if page_text:
                 extracted_text += page_text + "\n"
 
-        # Remove unnecessary spaces
         extracted_text = extracted_text.strip()
 
-        # Check whether text was extracted
+        # --------------------------------------------------
+        # CHECK PDF TEXT
+        # --------------------------------------------------
+
         if extracted_text:
 
             st.success("PDF successfully processed! ✅")
@@ -105,64 +107,59 @@ if uploaded_file is not None:
                 use_container_width=True
             ):
 
-                # Check API key
                 if not gemini_api_key:
 
                     st.warning(
-                        "Please enter your Gemini API key in the Settings section."
+                        "Please enter your Gemini API key in Settings."
                     )
 
                 else:
 
                     try:
 
-                        # Create Gemini client
                         client = genai.Client(
                             api_key=gemini_api_key
                         )
 
-                        # Prompt
-                        prompt = f"""
+                        summary_prompt = f"""
 You are an AI study assistant.
 
-Analyze the following study material and create a
-clear and student-friendly summary.
+Analyze the following study material and create
+a clear and student-friendly summary.
 
 STUDY MATERIAL:
 {extracted_text}
 
-Please provide:
+Provide:
 
 ## 📌 Main Topic
-Identify the main topic of the material.
+Identify the main topic.
 
 ## 🧠 Important Concepts
-List the most important concepts and explain them simply.
+Explain the important concepts simply.
 
 ## 🔑 Key Points
-Give the most important points a student should remember.
+List the most important points.
 
 ## 📚 Summary
-Give a concise overall summary that is easy for a student to understand.
+Give a concise overall summary.
 
-Important instructions:
+Important:
 - Only use information from the study material.
 - Do not invent facts.
 - Use simple language.
-- Use headings and bullet points where helpful.
+- Use headings and bullet points.
 """
 
-                        # Generate AI response
                         with st.spinner(
-                            "🤖 AI is generating your summary..."
+                            "🤖 Generating summary..."
                         ):
 
                             response = client.models.generate_content(
                                 model="gemini-3.7-flash",
-                                contents=prompt
+                                contents=summary_prompt
                             )
 
-                        # Display result
                         st.success(
                             "Summary generated successfully! ✅"
                         )
@@ -175,10 +172,128 @@ Important instructions:
                             f"Gemini error: {e}"
                         )
 
+
+            # --------------------------------------------------
+            # QUIZ SECTION
+            # --------------------------------------------------
+
+            st.divider()
+
+            st.header("🧠 Practice Quiz")
+
+            st.write(
+                "Test your knowledge with 10 questions "
+                "generated from your uploaded PDF."
+            )
+
+            # --------------------------------------------------
+            # GENERATE QUIZ BUTTON
+            # --------------------------------------------------
+
+            if st.button(
+                "🎯 Generate 10-Question Quiz",
+                use_container_width=True
+            ):
+
+                if not gemini_api_key:
+
+                    st.warning(
+                        "Please enter your Gemini API key in Settings."
+                    )
+
+                else:
+
+                    try:
+
+                        client = genai.Client(
+                            api_key=gemini_api_key
+                        )
+
+                        quiz_prompt = f"""
+You are an AI study assistant.
+
+Create a quiz containing exactly 10 questions
+based ONLY on the study material below.
+
+STUDY MATERIAL:
+{extracted_text}
+
+For each question:
+
+1. Write the question.
+2. Give four multiple-choice options:
+   A
+   B
+   C
+   D
+3. Clearly identify the correct answer.
+4. Give a short explanation of why the answer is correct.
+
+Use this exact format:
+
+## Question 1
+Question text
+
+A. Option A
+B. Option B
+C. Option C
+D. Option D
+
+**Answer:** B
+
+**Explanation:** Short explanation.
+
+## Question 2
+Question text
+
+A. Option A
+B. Option B
+C. Option C
+D. Option D
+
+**Answer:** A
+
+**Explanation:** Short explanation.
+
+Continue this format until Question 10.
+
+Important:
+- Create exactly 10 questions.
+- Use ONLY information from the PDF.
+- Do not invent information.
+- Make the questions useful for studying.
+- Mix easy, medium, and difficult questions.
+- Make sure each question has exactly one correct answer.
+"""
+
+                        with st.spinner(
+                            "🧠 Creating your 10-question quiz..."
+                        ):
+
+                            quiz_response = client.models.generate_content(
+                                model="gemini-3.7-flash",
+                                contents=quiz_prompt
+                            )
+
+                        st.success(
+                            "Quiz generated successfully! 🎉"
+                        )
+
+                        st.markdown(
+                            quiz_response.text
+                        )
+
+                    except Exception as e:
+
+                        st.error(
+                            f"Gemini error: {e}"
+                        )
+
         else:
 
             st.warning(
-                "The PDF was uploaded, but no readable text could be extracted."
+                "The PDF was uploaded, but no readable text "
+                "could be extracted."
             )
 
     except Exception as e:
